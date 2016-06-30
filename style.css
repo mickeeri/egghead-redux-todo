@@ -4,8 +4,65 @@ body {
   font-family: monospace;
 }
 
-#app {
-  color: green;
-  font-size: 20px;
-  margin: 10px 20px;
+#root {
+  margin: 30px 50px;
 }
+
+.todos {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.todos li {
+  background-color: #F5F5F5;
+  padding: 10px;
+  width: 278px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  position: relative;
+  border: 1px solid grey;
+  border-radius: 2px;
+}
+
+.todos li:after {
+  content: "\f096";
+  font-family: FontAwesome;
+  margin-left: 5px;
+  position: absolute;
+  right: 8px;
+  font-size: 18px;
+}
+
+.todos li.completed {
+  color: grey;
+  text-decoration: line-through;
+}
+
+.todos li.completed:after {
+  content: "\f14a";
+  font-family: FontAwesome;
+  margin-left: 5px;
+}
+
+input {
+  margin-right: 5px;
+  padding: 4px;
+  width: 200px;
+}
+
+button {
+  border: 1px solid grey;
+  border-radius: 2px;
+  padding: 5px 10px;
+  background: #F5F5F5;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #EEEEEF;
+}
+
+
