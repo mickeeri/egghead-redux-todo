@@ -1,0 +1,11 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: monospace;
+}
+
+#app {
+  color: green;
+  font-size: 20px;
+  margin: 10px 20px;
+}
