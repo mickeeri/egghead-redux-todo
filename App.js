@@ -58,13 +58,14 @@ const todoApp = combineReducers({
 
 const store = createStore(todoApp);
 
-const FilterLink = ({
-  filter,
-  currentFilter,
+// Only specifies the apperance of a link. But does not know
+// anything about the behavior.
+const Link = ({
+  active,
   children,
   onClick,
 }) => {
-  if (filter === currentFilter) {
+  if (active) {
     return <span>{children}</span>;
   }
   return (
@@ -72,7 +73,7 @@ const FilterLink = ({
       href="#"
       onClick={e => {
         e.preventDefault();
-        onClick(filter);
+        onClick();
       }}
     >
       {children}
@@ -80,44 +81,72 @@ const FilterLink = ({
   );
 };
 
-FilterLink.propTypes = {
-  filter: React.PropTypes.string.isRequired,
-  children: React.PropTypes.string.isRequired,
-  currentFilter: React.PropTypes.string.isRequired,
-  onClick: React.PropTypes.func.isRequired,
-};
+// Container for data and behavior for the presentational
+// Link component.
+class FilterLink extends React.Component {
+  componentDidMount() {
+    this.unsubscribe = store.subscribe(() =>
+      this.forceUpdate()
+    );
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  render() {
+    const props = this.props;
+    const state = store.getState();
+
+    // Delegates all rendering to the Link component.
+    return (
+      <Link
+        active={props.filter === state.visibiltyFilter}
+        onClick={() =>
+          store.dispatch({
+            type: 'SET_VISIBILITY_FILTER',
+            filter: props.filter,
+          })
+        }
+      >
+        {props.children}
+      </Link>
+    );
+  }
+}
+
+// FilterLink.propTypes = {
+//   filter: React.PropTypes.string.isRequired,
+//   children: React.PropTypes.string.isRequired,
+//   currentFilter: React.PropTypes.string.isRequired,
+//   onClick: React.PropTypes.func.isRequired,
+// };
 
 // Renders the filter links.
-const Footer = ({ visibiltyFilter, onFilterClick }) => (
+const Footer = () => (
   <p className="filters">
     Show:
     {' '}
     <FilterLink
-      currentFilter={visibiltyFilter}
       filter="SHOW_ALL"
-      onClick={onFilterClick}
     >All
     </FilterLink>
     <span> | </span>
     <FilterLink
-      currentFilter={visibiltyFilter}
       filter="SHOW_ACTIVE"
-      onClick={onFilterClick}
     >Active
     </FilterLink>
     <span> | </span>
     <FilterLink
-      currentFilter={visibiltyFilter}
       filter="SHOW_COMPLETED"
-      onClick={onFilterClick}
     >Completed</FilterLink>
   </p>
 );
 
-Footer.propTypes = {
-  visibiltyFilter: React.PropTypes.string.isRequired,
-  onFilterClick: React.PropTypes.func.isRequired,
-};
+// Footer.propTypes = {
+//   visibiltyFilter: React.PropTypes.string.isRequired,
+//   onFilterClick: React.PropTypes.func.isRequired,
+// };
 
 const Todo = ({onClick, completed, text}) => (
   <li
@@ -206,15 +235,7 @@ const TodoApp = ({ todos, visibiltyFilter }) => (
         })
       }
     />
-    <Footer
-      visibiltyFilter={visibiltyFilter}
-      onFilterClick={filter =>
-        store.dispatch({
-          type: 'SET_VISIBILITY_FILTER',
-          filter,
-        })
-      }
-    />
+    <Footer />
   </div>
 );
 
