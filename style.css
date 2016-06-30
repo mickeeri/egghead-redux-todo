@@ -2,6 +2,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: monospace;
+  font-size: 14px;
 }
 
 #root {
@@ -19,10 +20,9 @@ body {
   width: 278px;
   margin-bottom: 5px;
   cursor: pointer;
-  font-size: 14px;
   font-weight: bold;
   position: relative;
-  border: 1px solid grey;
+  border: 1px solid #949090;
   border-radius: 2px;
 }
 
@@ -53,7 +53,7 @@ input {
 }
 
 button {
-  border: 1px solid grey;
+  border: 1px solid #949090;
   border-radius: 2px;
   padding: 5px 10px;
   background: #F5F5F5;
@@ -62,7 +62,29 @@ button {
 }
 
 button:hover {
-  background: #EEEEEF;
+  background: #D1D1D1;
+}
+
+.filters {
+  border: 1px solid #949090;
+  padding: 10px;
+  width: 278px;
+  border-radius: 2px;
+  font-weight: bold;
+}
+
+.filters a {
+  text-decoration: none;
+  color: #298eea;
+}
+
+.filters a:hover {
+  text-decoration: underline;
+  color: #666;
+}
+
+.filters span {
+  color: #666;
 }
 
 
