@@ -1,6 +1,7 @@
 import { createStore, combineReducers } from 'redux';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Provider from 'react-redux';
 
 const todo = (state, action) => {
   switch (action.type) {
@@ -56,7 +57,7 @@ const todoApp = combineReducers({
   visibiltyFilter,
 });
 
-const store = createStore(todoApp);
+// const store = createStore(todoApp);
 
 // Only specifies the apperance of a link. But does not know
 // anything about the behavior.
@@ -81,10 +82,17 @@ const Link = ({
   );
 };
 
+// Link.propTypes = {
+//   active: React.PropTypes.bool.isRequired,
+//   children: React.PropTypes.string.isRequired,
+//   onClick: React.PropTypes.func.isRequired,
+// };
+
 // Container for data and behavior for the presentational
 // Link component.
 class FilterLink extends React.Component {
   componentDidMount() {
+    const { store } = this.context;
     this.unsubscribe = store.subscribe(() =>
       this.forceUpdate()
     );
@@ -96,6 +104,7 @@ class FilterLink extends React.Component {
 
   render() {
     const props = this.props;
+    const { store } = this.context;
     const state = store.getState();
 
     // Delegates all rendering to the Link component.
@@ -114,6 +123,9 @@ class FilterLink extends React.Component {
     );
   }
 }
+FilterLink.contextTypes = {
+  store: React.PropTypes.object,
+};
 
 // FilterLink.propTypes = {
 //   filter: React.PropTypes.string.isRequired,
@@ -148,15 +160,24 @@ const Footer = () => (
 //   onFilterClick: React.PropTypes.func.isRequired,
 // };
 
-const Todo = ({onClick, completed, text}) => (
+const Todo = ({ onClick, completed, text }) => (
   <li
     onClick={onClick}
     className={completed ? 'completed' : ''}
-  >{text}</li>
+  >
+    {text}
+  </li>
 );
 
+Todo.propTypes = {
+  onClick: React.PropTypes.func.isRequired,
+  completed: React.PropTypes.bool.isRequired,
+  text: React.PropTypes.string.isRequired,
+};
+
+
 // Receives array of todos and maps individual Todo components.
-const TodoList = ({todos, onTodoClick}) => (
+const TodoList = ({ todos, onTodoClick }) => (
   <ul className="todos">
     {todos.map(todo =>
       <Todo
@@ -168,9 +189,10 @@ const TodoList = ({todos, onTodoClick}) => (
   </ul>
 );
 
+let nextTodoId = 0;
 // Presentational component that renders input and button
 // for adding new todo item.
-const AddTodo = ({ onAddClick }) => {
+const AddTodo = (props, { store }) => {
   let input;
   return (
     <div>
@@ -182,7 +204,11 @@ const AddTodo = ({ onAddClick }) => {
       />
       <button
         onClick={() => {
-          onAddClick(input.value);
+          store.dispatch({
+            type: 'ADD_TODO',
+            id: nextTodoId++,
+            text: input.value,
+          })
           input.value = '';
         }}
       >Add Todo
@@ -190,10 +216,13 @@ const AddTodo = ({ onAddClick }) => {
     </div>
   );
 };
-
-AddTodo.propTypes = {
-  onAddClick: React.PropTypes.func.isRequired,
+AddTodo.contextTypes = {
+  store: React.PropTypes.object,
 };
+
+// AddTodo.propTypes = {
+//   onAddClick: React.PropTypes.func.isRequired,
+// };
 
 const getVisibleTodos = (todos, filter) => {
   switch (filter) {
@@ -212,50 +241,68 @@ const getVisibleTodos = (todos, filter) => {
   }
 };
 
-let nextTodoId = 0;
+class VisibleTodoList extends React.Component {
+  componentDidMount() {
+    const { store } = this.context;
+    this.unsubscribe = store.subscribe(() =>
+      this.forceUpdate()
+    );
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  render() {
+    const props = this.props;
+    const { store } = this.context;
+    const state = store.getState();
+
+    return (
+      <TodoList
+        todos={
+          getVisibleTodos(
+            state.todos,
+            state.visibiltyFilter
+          )
+        }
+        onTodoClick={id =>
+          store.dispatch({
+            type: 'TOGGLE_TODO',
+            id,
+          })
+        }
+      />
+    );
+  }
+}
+VisibleTodoList.contextTypes = {
+  store: React.PropTypes.object,
+};
+
+
 // Container component. Calls components responsible for presentation only.
-const TodoApp = ({ todos, visibiltyFilter }) => (
+const TodoApp = () => (
   <div>
     <h1>React Redux TODO list</h1>
-    <AddTodo
-      onAddClick={text =>
-        store.dispatch({
-          type: 'ADD_TODO',
-          id: nextTodoId++,
-          text,
-        })
-      }
-    />
-    <TodoList
-      todos={getVisibleTodos(todos, visibiltyFilter)}
-      onTodoClick={id =>
-        store.dispatch({
-          type: 'TOGGLE_TODO',
-          id,
-        })
-      }
-    />
+    <AddTodo />
+    <VisibleTodoList />
     <Footer />
   </div>
 );
 
-TodoApp.propTypes = {
-  todos: React.PropTypes.array.isRequired,
-  visibiltyFilter: React.PropTypes.string.isRequired,
-};
+// TodoApp.propTypes = {
+//   todos: React.PropTypes.array.isRequired,
+//   visibiltyFilter: React.PropTypes.string.isRequired,
+// };
 
 // TodoApp get's re-rendered every time the store changes.
-const render = () => {
-  // TodoApp component receives keys to the global state object as props.
-  // That is an array of todos and the visibilityFilter values.
-  ReactDOM.render(
-    <TodoApp {...store.getState()} />,
-    document.getElementById('root')
-  );
-};
+// TodoApp component receives keys to the global state object as props.
+// That is an array of todos and the visibilityFilter values.
+ReactDOM.render(
+  <Provider store={createStore(todoApp)}>
+    <TodoApp />
+  </Provider>,
+  document.getElementById('root')
+);
 
-// Subscribe to store changes and call render.
-store.subscribe(render);
-
-// Render inital state
-render();
