@@ -1,16 +1,54 @@
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import { toggleTodo } from '../actions';
+import * as actions from '../actions';
 import { getVisibleTodos } from '../reducers';
 import TodoList from './TodoList';
 
-const mapStateToProps = (state, { params }) => ({
-  todos: getVisibleTodos(state, params.filter || 'all'),
-});
+class VisibleTodoList extends Component {
+  componentDidMount() {
+    this.fetchData();
+  }
 
-const VisibleTodoList = withRouter(connect(
+  componentDidUpdate(prevProps) {
+    if (this.props.filter !== prevProps.filter) {
+      this.fetchData();
+    }
+  }
+
+  fetchData() {
+    const { filter, fetchTodos } = this.props;
+    fetchTodos(filter);
+  }
+
+  render() {
+    const { toggleTodo, ...rest } = this.props;
+    return (
+      <TodoList
+        {...rest}
+        onTodoClick={toggleTodo}
+      />
+    );
+  }
+}
+
+VisibleTodoList.propTypes = {
+  filter: PropTypes.oneOf(['all', 'active', 'completed']).isRequired,
+  fetchTodos: PropTypes.func.isRequired,
+  toggleTodo: PropTypes.func.isRequired,
+};
+
+const mapStateToProps = (state, { params }) => {
+  const filter = params.filter || 'all';
+  return {
+    todos: getVisibleTodos(state, filter),
+    filter,
+  };
+};
+
+VisibleTodoList = withRouter(connect(
   mapStateToProps,
-  { onTodoClick: toggleTodo }
-)(TodoList));
+  actions
+)(VisibleTodoList));
 
 export default VisibleTodoList;
