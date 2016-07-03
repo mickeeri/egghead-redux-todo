@@ -1,4 +1,5 @@
-import './../style.css';
+require('./../style.css');
+require('font-awesome/css/font-awesome.css');
 
 import React from 'react';
 import { render } from 'react-dom';
