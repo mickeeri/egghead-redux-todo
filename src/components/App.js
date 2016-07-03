@@ -3,13 +3,11 @@ import Footer from './Footer';
 import AddTodo from './AddTodo';
 import VisibleTodoList from './VisibleTodoList';
 
-const App = ({ params }) => (
+const App = () => (
   <div>
     <h1>React Redux TODO list</h1>
     <AddTodo />
-    <VisibleTodoList
-      filter={params.filter || 'all'}
-    />
+    <VisibleTodoList />
     <Footer />
   </div>
 );

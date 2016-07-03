@@ -1,3 +1,5 @@
+import 'babel-polyfill';
+
 require('./../style.css');
 require('font-awesome/css/font-awesome.css');
 
